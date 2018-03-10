@@ -1,32 +1,27 @@
-﻿open System
-open Suave
-open Suave.Filters
-open Suave.Operators
-open Suave.Successful
-open System.Threading
-let addPoint (ctx:HttpContext) = async {
-  return Some ctx
-}
+namespace Patref
 
-let app =
-  choose
-    [ GET >=> choose
-        [ path "/space" >=> OK "Good bye GET"
-          path "/lines/%d" >=> OK "Good bye GET" ]
-      POST >=> choose
-        [ path "/point" >=> addPoint ] 
-      DELETE >=> choose
-        [ path "/point/%d" >=> OK "" 
-          path "/space" >=> OK "Hello GET" ]
-    ]
+open System
+open System.Collections.Generic
+open System.IO
+open System.Linq
+open System.Threading.Tasks
+open Microsoft.AspNetCore
+open Microsoft.AspNetCore.Hosting
+open Microsoft.Extensions.Configuration
+open Microsoft.Extensions.Logging
 
-[<EntryPoint>]
-let main argv =
-    let cts = new CancellationTokenSource()
-    let conf = { defaultConfig with bindings = [ HttpBinding.createSimple HTTP "0.0.0.0" 8083 ];
-                                cancellationToken = cts.Token }
-    let _, server = startWebServerAsync conf app
-    Async.Start(server, cts.Token)
-    printfn "Make requests now"
-    Console.ReadKey true |> ignore
-    0
+module Program =
+    let exitCode = 0
+
+    let BuildWebHost args =
+        WebHost
+            .CreateDefaultBuilder(args)
+            .UseStartup<Startup>()
+            .UseUrls("http://0.0.0.0:3000")
+            .Build()
+
+    [<EntryPoint>]
+    let main args =
+        BuildWebHost(args).Run()
+
+        exitCode
