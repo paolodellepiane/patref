@@ -1,23 +1,19 @@
 module U
-
 type Point = { x:float; y:float }
-type Space = Point Set
 let origin a b = (b.x * a.y - a.x * b.y) / (b.x - a.x)
-
 let slope a b = (b.y - a.y) / (b.x - a.x)
+type Line = { m:float; q:float } 
+type Line with static member Create a b = { m=origin a b; q=slope a b }
+type Space = Point Set
 
-let simpleHash a b =
-    if b.x = a.x then a.x.ToString()
-    else sprintf "%f,%f" (slope a b) (origin a b)
-
-let withPoints (lines:Map<string, Space>) (points:Point*Point) =
+let withPoints (lines:Map<Line, Space>) (points:Point*Point) =
     match points with
     | a, b when a = b -> lines
     | a, b ->
-        let hash = simpleHash a b
-        match Map.tryFind hash lines with
-        | Some s -> Map.add hash (s.Add(a).Add(b)) lines
-        | None -> Map.add hash Set.empty lines
+        let line = Line.Create a b
+        match Map.tryFind line lines with
+        | Some s -> Map.add line (s.Add(a).Add(b)) lines
+        | None -> Map.add line Set.empty lines
 
 let permute (arr:'T[]) =
     [ for i in [0..arr.Length - 1] do
